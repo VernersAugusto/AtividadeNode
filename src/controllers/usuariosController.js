@@ -15,6 +15,13 @@ module.exports = (app) => {
             } catch (error) {
                 res.send(`Erro ao adicionar usuário: ${usuario.nome}`);
             }
-        }
+        },
+
+        consultarPorId: (req, res) => {
+            let id = req.params.id;
+            let usuario = app.db.usuariosDB.find((item) => id == item.id);
+            res.json(usuario);
+
+        },
     }
 }
