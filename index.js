@@ -1,9 +1,6 @@
 const express = require('express');
 const consign = require("consign");
 
-// const produtosController = require("./src/controllers/produtosController");
-// const usuariosController = require("./src/controllers/usuariosController");
-
 const app = express();
 
 app.use(express.json());
