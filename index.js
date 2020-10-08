@@ -8,6 +8,7 @@ app.use(express.urlencoded({ extended: false }))
 
 consign({ cwd: 'src' })
     .include("db")
+    .then("models")
     .then("controllers")
     .then("routes")
     .into(app);

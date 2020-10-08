@@ -1,43 +1,63 @@
 module.exports = app => {
+    let pokemonsModel = app.db.mongoose.model("Pokemons");
+
     return {
         listarPokemons: (req, res) => {
-            res.json(app.db.pokemonsDB);
+            pokemonsModel.find({})
+                .then((pokemons) => res.json(pokemons))
+                .catch((error) => res.status(500).send(error));
         },
 
-        consultarPorId: (req, res) => {
+        consultarPorId: async (req, res) => {
             let id = req.params.id;
 
-            let pokemon = app.db.pokemonsDB.find((item) => id == item.id);
-            res.json(pokemon);
+            try {
+                pokemon = await pokemonsModel.findById(id);
+
+                if (pokemon)
+                    res.json(pokemon);
+                else
+                    res.status(404).send("Pokemon não encontrado");
+            } catch (error) {
+                res.status(500).send(`Erro ao buscar pokemon: ${error}`);
+            }
         },
 
         adicionar: (req, res) => {
             try {
-                let pokemon = req.body;
-
-                app.db.pokemonsDB.push(pokemon);
-
-                res.send(`Pokemon adicionado com sucesso: ${pokemon.nome}`);
+                let pokemon = new pokemonsModel(req.body);
+                pokemon.save((error) => {
+                    if (error)
+                        res.status(500).send(`Erro ao criar pokemon: ${error}`);
+                    else
+                        res.send(`Pokemon adicionado com sucesso: ${pokemon.nome}`);
+                })
             } catch (error) {
                 res.send(`Erro ao adicionar pokemon ${pokemon.nome}: ${error}`);
             }
         },
 
         atualizar: (req, res) => {
-            let id = req.body.id;
+            let id = req.params.id;
             let pokemon = req.body;
-            let index = app.db.pokemonsDB.findIndex((item) => id == item.id);
 
-            app.db.pokemonsDB[index] = pokemon;
-
-            res.send(`Pokemon ${pokemon.nome} atualizado com sucesso`);
+            pokemonsModel.findByIdAndUpdate(id, pokemon, (error) => {
+                if (error)
+                    res.status(500).send(`Erro ao atualizar pokemon: ${error}`);
+                else
+                    res.send(`Pokémon atualizado com sucesso ${pokemon.nome}`)
+            });
         },
 
         excluir: (req, res) => {
-            let id = req.body.id;
+            let id = req.params.id;
 
-            app.db.pokemonsDB = app.db.pokemonsDB.filter((item) => id != item.id);
-            res.send(`Pokemon excluído com sucesso`);
+            pokemonsModel.findByIdAndRemove(id, (error) => {
+                if (error)
+                    res.status(500).send(`Erro ao excluir pokemon: ${error}`)
+                else
+                    res.send("Pokemon excluído com sucesso");
+            });
         }
     }
 }
