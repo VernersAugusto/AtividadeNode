@@ -1,43 +1,56 @@
 module.exports = app => {
+    let treinadoresModel = app.db.mongoose.model("Treinadores");
+
     return {
         listarTreinadores: (req, res) => {
-            res.json(app.db.treinadoresDB);
+            treinadoresModel.find({})
+                .then((treinadores) => res.json(treinadores))
+                .catch((error) => res.status(500).send(error));
         },
 
         consultarPorId: (req, res) => {
             let id = req.params.id;
 
-            let treinador = app.db.treinadoresDB.find((item) => id == item.id);
-            res.json(treinador);
+            treinadoresModel.findById(id)
+                .then((treinador) => res.json(treinador))
+                .catch((error) => res.status(500).send(error));
         },
 
         adicionar: (req, res) => {
             try {
-                let treinador = req.body;
-
-                app.db.treinadoresDB.push(treinador);
-
-                res.send(`Treinador adicionado com sucesso ${treinador.nome}`);
+                let treinador = new treinadoresModel(req.body);
+                treinador.save((error) => {
+                    if (error)
+                        res.send(500).send(`Erro ao adicionar treinador ${treinador.nome}: ${error}`);
+                    else
+                        res.send(`Treinador adicionado com sucesso ${treinador.nome}`);
+                });
             } catch (error) {
                 res.send(`Erro ao adicionar treinador ${treinador.nome}: ${error}`);
             }
         },
 
         atualizar: (req, res) => {
-            let id = req.body.id;
+            let id = req.params.id;
             let treinador = req.body;
-            let index = app.db.treinadoresDB.findIndex((item) => id == item.id);
 
-            app.db.treinadoresDB[index] = treinador;
-
-            res.send(`Treinador ${treinador.nome} atualizado com sucesso`);
+            treinadoresModel.findByIdAndUpdate(id, treinador, (error) => {
+                if (error)
+                    res.status(500).send(`Erro ao atualizar treinador ${treinador.nome}: ${error}`)
+                else
+                    res.send(`Treinador ${treinador.nome} atualizado com sucesso`);
+            });
         },
 
         excluir: (req, res) => {
-            let id = req.body.id;
+            let id = req.params.id;
 
-            app.db.treinadoresDB = app.db.treinadoresDB.filter((item) => id != item.id);
-            res.send(`Treinador excluído com sucesso`);
+            treinadoresModel.findByIdAndRemove(id, (error) => {
+                if (error)
+                    res.status(500).send(`Erro ao excluir treinador: ${error}`)
+                else
+                    res.send(`Treinador excluído com sucesso`);
+            })
         }
     }
 }
