@@ -4,6 +4,10 @@ module.exports = app => {
             type: String,
             required: [true, "é obrigatório"]
         },
+        descricao: {
+            type: String,
+            required: [true, "é obrigatório"]
+        },
         tipo1: {
             type: String,
             required: [true, "é obrigatório"]
